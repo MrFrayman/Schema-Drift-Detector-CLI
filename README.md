@@ -61,3 +61,7 @@ Please make sure to update tests as appropriate.
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+
+### Links
+
+[PyPI](https://pypi.org/project/schema-drift-cli/)
