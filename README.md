@@ -1,67 +1,150 @@
-# Schema Drift Detector - CLI
+# Schema-Drift-CLI
 
-Schema Drift Detector is a CLI that: 
-- Fetches a JSON payload from an HTTP API endpoint (GET for v1).
-- Loads a “baseline” schema from a local file (JSON).
-- Compares structure: added/removed/changed fields, type changes, optional vs required.
-- Outputs the diff in three formats: JSON, Markdown, and a pretty terminal table.
+Detect when your API response structure changes. compares live endpoint against a baseline schema.
 
-## Language & Stack
+## What it does
 
-I used Python and Click for the CLI as they make argument parsing, subcommands, and help text clean and maintainable.
+- fetch JSON from an HTTP endpoint
+- compare it against a saved baseline schema
+- show what changed: added fields, removed fields, type changes, required vs optional
+- output the diff as JSON, markdown, or a terminal table
 
-## Output Examples
+useful for catching breaking changes before they break your app.
 
-### JSON:
-Simple: 
-```bash 
-print(json.dumps(diff, indent=2))
+## How it works
+
+```bash
+# compare live API against baseline
+schema-drift check https://api.example.com/users baseline.json
+
+# outputs show you exactly what drifted
 ```
-Good for machines and CI logs.
 
-### Markdown:
-```text
+handles:
+- nested objects
+- arrays
+- type changes (string → number, etc)
+- optional/required field shifts
+
+doesn't handle:
+- POST/PUT endpoints (v1 is GET only)
+- authentication (yet)
+- schema versioning
+- historical drift tracking
+
+## Output formats
+
+### JSON
+machine-readable. good for CI pipelines or piping to other tools.
+
+```json
+{
+  "added": [
+    {"path": "user.middle_name", "type": "string"}
+  ],
+  "removed": [
+    {"path": "user.age", "type": "number"}
+  ],
+  "changed": [
+    {"path": "user.active", "old": "boolean", "new": "string"}
+  ]
+}
+```
+
+### Markdown
+works in docs, PRs, or anywhere you need readable tables.
+
+```markdown
 ### Added fields
-
 | Path              | Type   |
 |-------------------|--------|
 | `user.middle_name`| string |
+
+### Type changes
+| Path         | Old     | New    |
+|--------------|---------|--------|
+| `user.active`| boolean | string |
 ```
 
-### Pretty Terminal Table:
-```text
-ADDED | user.middle_name | - | string
+### Terminal Table
+quick visual scan when you just run it locally.
+
+```
+ADDED   | user.middle_name | -       | string
+REMOVED | user.age        | number  | -
+CHANGED | user.active     | boolean | string
 ```
 
 ## Installation
 
-Use the package manager [pip](https://pypi.org/project/reorder-editable/) to install reorder-editable.
+```bash
+pip install schema-drift-cli
+```
+
+or install from source:
 
 ```bash
+git clone https://github.com/yourusername/schema-drift-cli
+cd schema-drift-cli
 pip install -e .
 ```
 
 ## Usage
 
 ```bash
-python -m schema_drift_cli --help
+# check drift
+schema-drift check <endpoint-url> <baseline-file> [--format json|markdown|table]
+
+# save current response as baseline
+schema-drift snapshot <endpoint-url> <output-file>
+
+# show version
+schema-drift version
 ```
 
-### Commands
+### Creating a baseline
 
-- `version` - Shows the CLI version
+first time setup:
+
+```bash
+# grab current schema as your baseline
+schema-drift snapshot https://api.example.com/users baseline.json
+```
+
+then later:
+
+```bash
+# check if anything changed
+schema-drift check https://api.example.com/users baseline.json
+```
+
+exits with code 0 if no drift, 1 if drift detected. good for CI gates.
+
+## Why python + click
+
+click makes CLI parsing clean. you get help text, subcommands, and validation without much code. python's `requests` + `json` libs handle the HTTP and comparison logic simply.
+
+could've done it in node or go, but for a schema diff tool, python's data handling is straightforward.
+
+## Limitations
+
+- GET requests only right now
+- no auth headers (you can add them in code, but not via CLI flags yet)
+- doesn't track when drift happened, just that it did
+- assumes JSON responses (no XML, no protobuf)
+
+if your endpoint needs auth or uses POST, you'll need to modify the source or wait for v2.
 
 ## Contributing
 
-Pull requests are welcome. For major changes, please open an issue first
-to discuss what you would like to change.
-
-Please make sure to update tests as appropriate.
+if you hit bugs or want features, open an issue. PRs welcome, especially for:
+- auth support (headers, tokens)
+- better diff algorithms
+- ignoring certain paths
+- config file support
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+MIT
 
-### Links
-
-[PyPI](https://pypi.org/project/schema-drift-cli/)
+[pypi](https://pypi.org/project/schema-drift-cli/)
