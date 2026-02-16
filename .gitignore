@@ -1,0 +1,10 @@
+# files
+.env
+.cpython-313.pyc
+
+# Directories
+node_modules/
+.venv/
+dist/
+__pycache__/
+build/

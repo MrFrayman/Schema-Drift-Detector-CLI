@@ -1,0 +1,36 @@
+{
+  "name": "schema-drift",
+  "version": "0.1.0",
+  "description": "Detect schema drift and breaking changes in your JSON APIs. Initialize a basline schema, then continuously check for structural changes. Get clear reports on what's changed and where. Perfect for API monitoring, CI/CD validation, and catching unintended data structure changes before they break production.",
+  "main": "pyproject.toml",
+  "scripts": {
+    "test": "pytest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrFrayman/Schema-Drift-Detector-CLI.git"
+  },
+  "keywords": [
+    "schema-drift",
+    "schema",
+    "validation",
+    "json",
+    "validation",
+    "api",
+    "monitoring",
+    "breaking",
+    "changes",
+    "api",
+    "diff",
+    "data",
+    "contract",
+    "change",
+    "detection"
+  ],
+  "author": "Syed Maarif R.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrFrayman/Schema-Drift-Detector-CLI/issues"
+  },
+  "homepage": "https://github.com/MrFrayman/Schema-Drift-Detector-CLI#readme"
+}

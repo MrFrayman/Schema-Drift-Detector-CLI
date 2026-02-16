@@ -7,6 +7,16 @@ app = typer.Typer(help="Schema Drift Detector CLI")
 def on_startup(ctx: typer.Context) -> None:
     """Schema Drift Detector CLI"""
     if ctx.invoked_subcommand is None:
+        ascii_art = """
+███████╗ ██████╗██╗  ██╗███████╗███╗   ███╗ █████╗     ██████╗ ██████╗ ██╗███████╗████████╗
+██╔════╝██╔════╝██║  ██║██╔════╝████╗ ████║██╔══██╗    ██╔══██╗██╔══██╗██║██╔════╝╚══██╔══╝
+███████╗██║     ███████║█████╗  ██╔████╔██║███████║    ██║  ██║██████╔╝██║█████╗     ██║   
+╚════██║██║     ██╔══██║██╔══╝  ██║╚██╔╝██║██╔══██║    ██║  ██║██╔══██╗██║██╔══╝     ██║   
+███████║╚██████╗██║  ██║███████╗██║ ╚═╝ ██║██║  ██║    ██████╔╝██║  ██║██║██║        ██║   
+╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚═╝╚═╝        ╚═╝   
+                                                                                        
+"""
+        typer.echo(ascii_art)
         typer.echo("Welcome to the Schema Drift Detector CLI!")
         typer.echo("Use --help for more information")
 
