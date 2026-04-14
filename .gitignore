@@ -1,10 +1,41 @@
-# files
+# Environment files
 .env
-.cpython-313.pyc
+.env.*
 
-# Directories
-node_modules/
+# Virtual environments
 .venv/
-dist/
+venv/
+
+# Python bytecode and caches
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build artifacts
 build/
+dist/
+*.egg
+
+# Coverage and test outputs
+.coverage
+.coverage.*
+htmlcov/
+
+# IDE/editor settings
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Project-local generated artifacts
+schema.json
+
+# Node (if used)
+node_modules/

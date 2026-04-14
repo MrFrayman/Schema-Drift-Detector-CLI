@@ -1,10 +1,13 @@
 import typer
 
+from schema_drift_cli.fetch import load_json_file, save_json_file
+from schema_drift_cli.schema import infer_schema
+
 # The typer application object
 app = typer.Typer(help="Schema Drift Detector CLI")
 
 @app.callback(invoke_without_command=True)
-def on_startup(ctx: typer.Context) -> None:
+def main(ctx: typer.Context) -> None:
     """Schema Drift Detector CLI"""
     if ctx.invoked_subcommand is None:
         ascii_art = """
@@ -30,44 +33,19 @@ def version() -> None:
 
 @app.command()
 def init(
-    url: str = typer.Option(None, "--url", "-u", help="API URL to fetch baseline from"),
-    file: str = typer.Option(None, "--file","-f",help="Local JSON file to use as baseline"),
-    out: str = typer.Option("schema.json", "--out", "-o", help="Output schema file")
+    file: str = typer.Option(..., "--file", "-f", help="Local JSON file to use as the sample"),
+    out: str = typer.Option("schema.json", "--out", "-o", help="Where to write the inferred schema"),
 ) -> None:
-    """
-    Initialize a baseline schema from an API URL or a local JSON file.
-    """
-    typer.echo("Initializing baseline schema...")
-    typer.echo(f"Source: {url or file or 'none specified'}")
-    typer.echo(f"Output: {out}")
-    typer.echo("Done! (This is just a dummy version tho, real ones coming later)")
+    """Infer a baseline schema from a JSON file and save it."""
+    data = load_json_file(file)
+    schema = infer_schema(data)
+    save_json_file(out, schema.to_dict())
+    typer.echo(f"Saved inferred schema to {out}") 
 
-@app.command()
-def check(
-    url: str = typer.Option(None, "--url", "-u", help="API URL to check"),
-    file: str = typer.Option(None, "--file","-f", help="Local JSON file to check"),
-    schema: str = typer.Option("schema.json", "--schema", "-s", help="Baseline schema file"),
-    output_format: str = typer.Option("table", "--output-format", "-of", help="Output format (json, markdown, table, all)"),
-    fail_on_drift: bool = typer.Option(False, "--fail-on-drift", "-fod", help="Exit 1 if drift detected")
-) -> None:
-    """
-    Check the current JSON against baseline schema.
-    """
-    typer.echo("Checking for schema drift...")
-    typer.echo(f"Live Data: {url or file or 'none'}")
-    typer.echo(f"Schema: {schema}")
-    typer.echo(f"Format: {output_format}")
-    typer.echo("No Drift Detected! (This is just a dummy version asw)")
 
-    if fail_on_drift:
-        typer.echo("    (fail-on-drift flag ignored for now)")
-
-def main() -> None:
-#     # Entrypoint that runs the Typer app
+def run() -> None:
     app()
 
 
 if __name__ == "__main__":
-    # When I run this file directly with `python schema_drift_cli/cli.py`
-    # Python sets __name__ to "__main__" and this block executes.
-    main()
+    run()

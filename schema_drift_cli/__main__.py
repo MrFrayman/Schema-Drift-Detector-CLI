@@ -1,4 +1,4 @@
-from schema_drift_cli.cli import main
+from schema_drift_cli.cli import run
 
 if __name__ == "__main__":
-    main()
+    run()
