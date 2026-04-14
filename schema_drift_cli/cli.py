@@ -3,6 +3,9 @@ import typer
 from schema_drift_cli.fetch import load_json_file, save_json_file
 from schema_drift_cli.schema import infer_schema
 
+from schema_drift_cli.diff import diff_schema
+from schema_drift_cli.fetch import load_json_file
+
 # The typer application object
 app = typer.Typer(help="Schema Drift Detector CLI")
 
@@ -41,6 +44,25 @@ def init(
     schema = infer_schema(data)
     save_json_file(out, schema.to_dict())
     typer.echo(f"Saved inferred schema to {out}") 
+
+@app.command()
+def check(
+    schema: str = typer.Option(..., "--schema", "-S", help="Baseline schema file"), 
+    file: str = typer.Option(..., "--file", "-f", help="Current JSON file to compare"),
+) -> None:
+    """Compare a current JSON file against a saved baseline schema."""
+    old_schema = load_json_file(schema)
+    current_data = load_json_file(file)
+    current_schema = infer_schema(current_data).to_dict()
+
+    diff = diff_schema(old_schema, current_schema)
+    result = diff.to_dict()
+
+    if not result["added"] and not result["removed"] and not result["changed_type"]:
+        typer.echo("No schema drift detected!")
+    else:
+        typer.echo("Schema drift detected:")
+        typer.echo(str(result))
 
 
 def run() -> None:

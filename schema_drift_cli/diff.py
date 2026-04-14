@@ -1,11 +1,8 @@
-# This is the heart of this project.
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from os import path
 from typing import Any
-from unittest import result
+
 
 @dataclass
 class DiffResult:
@@ -31,7 +28,7 @@ def diff_schema(old: dict[str, Any], new: dict[str, Any], path: str = "") -> Dif
         result.changed_type.append(
             {"path": path or ".", "from": old_kind, "to": new_kind}
         )
-    return result
+        return result
 
     if old_kind == "object":
         old_children = old.get("children", {})
