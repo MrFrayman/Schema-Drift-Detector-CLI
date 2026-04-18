@@ -56,7 +56,7 @@ def check(
     schema: str = typer.Option(..., "--schema", "-S", help="Baseline schema file"),
     file: str = typer.Option(..., "--file", "-f", help="Current JSON file to compare"),
     output_format: str = typer.Option(
-        "table", "--output-format", "-o", help="json, markdown, or table"
+        "table", "--output-format", "-of", help="json, markdown, or table"
     ),
 ) -> None:
     """Compare a current JSON file against a saved baseline schema."""

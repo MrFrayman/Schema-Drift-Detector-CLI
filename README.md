@@ -1,43 +1,89 @@
 # Schema-Drift-CLI
 
-Detect when your API response structure changes. compares live endpoint against a baseline schema.
+A small, pragmatic tool to detect when an API's JSON response shape changes. It compares a live response (or a local JSON sample) against a saved baseline schema and reports added/removed fields, type changes, and required/optional shifts.
+
+This is intentionally lightweight — meant to be a simple guardrail you can run locally or in CI, not a full-blown schema management system.
+
+---
 
 ## What it does
 
-- fetch JSON from an HTTP endpoint
-- compare it against a saved baseline schema
-- show what changed: added fields, removed fields, type changes, required vs optional
-- output the diff as JSON, markdown, or a terminal table
+- Load JSON from a URL or a local file
+- Infer a baseline schema from a sample JSON
+- Compare current JSON against the baseline
+- Report:
+  - added fields
+  - removed fields
+  - type changes (e.g., string → number)
+  - changes in required vs optional
+- Output as JSON, Markdown, or a terminal table
 
-useful for catching breaking changes before they break your app.
+Useful for catching breaking changes early, and for making schema diffs easy to review.
 
-## How it works
+---
 
-```bash
-# compare live API against baseline
-schema-drift check https://api.example.com/users baseline.json
+## Installation
 
-# outputs show you exactly what drifted
+From PyPI:
+```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L251-260
+pip install schema-drift-cli
 ```
 
-handles:
-- nested objects
-- arrays
-- type changes (string → number, etc)
-- optional/required field shifts
+From source (development / latest):
+```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L261-270
+git clone https://github.com/MrFrayman/Schema-Drift-Detector-CLI.git
+cd schema-drift-cli
+pip install -e .
+```
 
-doesn't handle:
-- POST/PUT endpoints (v1 is GET only)
-- authentication (yet)
-- schema versioning
-- historical drift tracking
+Note: if you edit the CLI code locally and the installed `schema-drift` command behaves differently, either reinstall or run the module directly (see Tips & Troubleshooting below).
+
+---
+
+## Commands & usage
+
+This project exposes three primary commands that match the CLI in the repo:
+
+- `init` — infer a schema from a sample JSON file and save it
+- `check` — compare a current JSON (file or response) against a saved baseline
+- `version` — print the CLI version
+
+Basic usage examples:
+
+Infer a baseline from a local file:
+```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L271-285
+schema-drift init --file sample.json --out schema.json
+# short flags: --file is -f, --out is -o
+```
+
+Compare a current JSON file against the baseline:
+```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L286-300
+schema-drift check --schema schema.json --file sample_changed.json --output-format json
+# output-format values: json | markdown | table
+# short flags: --schema is -S, --file is -f, --output-format is -of
+```
+
+Show help for commands:
+```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L301-305
+schema-drift --help
+schema-drift check --help
+```
+
+If you want to run the exact code in your working tree (useful during development):
+```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L306-311
+python -m schema_drift_cli.cli check --schema schema.json --file sample_changed.json --output-format table
+```
+
+---
 
 ## Output formats
 
-### JSON
-machine-readable. good for CI pipelines or piping to other tools.
+- `json` — machine-readable; easy to use in CI or downstream tooling
+- `markdown` — ready to paste into PRs, changelogs, or docs
+- `table` — quick human-readable terminal summary
 
-```json
+Example JSON diff:
+```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L312-330
 {
   "added": [
     {"path": "user.middle_name", "type": "string"}
@@ -51,100 +97,90 @@ machine-readable. good for CI pipelines or piping to other tools.
 }
 ```
 
-### Markdown
-works in docs, PRs, or anywhere you need readable tables.
-
-```markdown
+Example Markdown (good for PR comments):
+```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L331-350
 ### Added fields
-| Path              | Type   |
-|-------------------|--------|
-| `user.middle_name`| string |
+| Path               | Type   |
+|--------------------|--------|
+| `user.middle_name` | string |
 
 ### Type changes
-| Path         | Old     | New    |
-|--------------|---------|--------|
-| `user.active`| boolean | string |
+| Path          | Old     | New    |
+|---------------|---------|--------|
+| `user.active` | boolean | string |
 ```
 
-### Terminal Table
-quick visual scan when you just run it locally.
-
-```
+Terminal table (quick local inspection):
+```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L351-370
 ADDED   | user.middle_name | -       | string
-REMOVED | user.age        | number  | -
-CHANGED | user.active     | boolean | string
+REMOVED | user.age         | number  | -
+CHANGED | user.active      | boolean | string
 ```
 
-## Installation
+---
 
-```bash
-pip install schema-drift-cli
-```
+## Exit codes & CI integration
 
-or install from source:
+- `0` — no drift detected
+- `1` — drift detected (suitable to fail a pipeline)
+- `>1` — unexpected error (missing file, parse error, etc.)
 
-```bash
-git clone https://github.com/yourusername/schema-drift-cli
-cd schema-drift-cli
-pip install -e .
-```
+A typical CI pattern:
+1. Save a known-good baseline (checked into the repo)
+2. Run `schema-drift check` against the live API in your pipeline
+3. Fail the build if the command exits with code `1`
 
-## Usage
+---
 
-```bash
-# check drift
-schema-drift check <endpoint-url> <baseline-file> [--format json|markdown|table]
+## Limitations (current)
 
-# save current response as baseline
-schema-drift snapshot <endpoint-url> <output-file>
+- GET / JSON only — no POST bodies or non-JSON formats supported
+- No built-in auth flags (headers, tokens) yet — you can modify code or supply environment-level workarounds
+- No schema versioning or historical timeline tracking
+- No ignore rules or path-based filters yet
 
-# show version
-schema-drift version
-```
+These are deliberate choices to keep the tool small and useful for quick checks. If you need more complex behaviors, consider contributing or extending the code.
 
-### Creating a baseline
+---
 
-first time setup:
+## Tips & Troubleshooting
 
-```bash
-# grab current schema as your baseline
-schema-drift snapshot https://api.example.com/users baseline.json
-```
+- If you see "no such option: --output-format" when running the CLI, it's often because the `schema-drift` command you're invoking is not the one from your working tree (for example, an older installed package). Quick checks:
+  - Run `schema-drift check --help` to see the options the installed binary exposes.
+  - Run the module directly during development:
+    ```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L371-375
+    python -m schema_drift_cli.cli check --schema schema.json --file sample_changed.json --output-format json
+    ```
+  - Reinstall from your local source if needed:
+    ```D:/My CodeDocs/CLI Projects/Schema-Drift-Detector-CLI/README.md#L376-380
+    pip install -e .
+    ```
+- If `render_table` appears not to print when using `--output-format table`, check whether the function returns a string or prints directly — the CLI expects a printable output for table mode.
 
-then later:
+---
 
-```bash
-# check if anything changed
-schema-drift check https://api.example.com/users baseline.json
-```
+## Why Typer & Python
 
-exits with code 0 if no drift, 1 if drift detected. good for CI gates.
+Typer gives a clean, Pythonic CLI with automatic help and argument parsing while keeping the code readable. Python's built-in JSON handling and data-structure ergonomics make it easy to implement schema inference and diffing without a lot of ceremony.
 
-## Why python + click
+Yes, you could write this in Go or Node — but for quick iteration and tooling around JSON, Python is often the faster path.
 
-click makes CLI parsing clean. you get help text, subcommands, and validation without much code. python's `requests` + `json` libs handle the HTTP and comparison logic simply.
-
-could've done it in node or go, but for a schema diff tool, python's data handling is straightforward.
-
-## Limitations
-
-- GET requests only right now
-- no auth headers (you can add them in code, but not via CLI flags yet)
-- doesn't track when drift happened, just that it did
-- assumes JSON responses (no XML, no protobuf)
-
-if your endpoint needs auth or uses POST, you'll need to modify the source or wait for v2.
+---
 
 ## Contributing
 
-if you hit bugs or want features, open an issue. PRs welcome, especially for:
-- auth support (headers, tokens)
-- better diff algorithms
-- ignoring certain paths
-- config file support
+This project is intentionally small and approachable. Help is welcome — open an issue if you hit a problem or want a feature. PRs with tests and examples are especially appreciated.
+
+Ideas that are useful right now:
+- auth support (headers, tokens, OAuth)
+- configurable ignore rules (paths, patterns)
+- snapshot/monitor subcommand for scheduled checks
+- richer diff output (context, sample values, fuzzy matching)
+
+---
 
 ## License
 
 MIT
 
-[pypi](https://pypi.org/project/schema-drift-cli/)
+Project page: https://pypi.org/project/schema-drift-cli/
