@@ -2,7 +2,7 @@
 
 A small, pragmatic tool to detect when an API's JSON response shape changes. It compares a live response (or a local JSON sample) against a saved baseline schema and reports added/removed fields, type changes, and required/optional shifts.
 
-This is intentionally lightweight — meant to be a simple guardrail you can run locally or in CI, not a full-blown schema management system.
+This is lightweight, meant to be a simple guardrail you can run locally or in CI, not a full-blown schema management system.
 
 ---
 
