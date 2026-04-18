@@ -1,0 +1,25 @@
+{
+  "kind": "object",
+  "children": {
+    "user": {
+      "kind": "object",
+      "children": {
+        "id": {
+          "kind": "integer"
+        },
+        "name": {
+          "kind": "string"
+        },
+        "active": {
+          "kind": "boolean"
+        }
+      }
+    },
+    "tags": {
+      "kind": "array",
+      "item": {
+        "kind": "string"
+      }
+    }
+  }
+}
