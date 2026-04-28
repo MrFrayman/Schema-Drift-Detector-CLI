@@ -18,7 +18,7 @@ def save_json_file(path: str | Path, data: Any) -> None:
         f.write("\n")
 
 
-def fetch_json_url(url: str) -> Any:
+def fetch_json_url(url: str | Any) -> Any:
     response = requests.get(url, timeout=15)
     response.raise_for_status()
     return response.json()

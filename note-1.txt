@@ -1,0 +1,9 @@
+what we have so far:
+
+CLI input parsing
+local file handling
+HTTP fetching
+JSON parsing
+schema inference
+diffing
+output formatting - json, md, table
