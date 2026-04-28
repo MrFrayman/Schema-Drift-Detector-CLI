@@ -1,7 +1,7 @@
 import typer
 
 from schema_drift_cli.diff import diff_schema
-from schema_drift_cli.fetch import load_json_file, save_json_file
+from schema_drift_cli.fetch import fetch_json_url, load_json_file, save_json_file
 from schema_drift_cli.output import render_json, render_markdown, render_table
 from schema_drift_cli.schema import infer_schema
 
@@ -40,12 +40,17 @@ def init(
     file: str = typer.Option(
         ..., "--file", "-f", help="Local JSON file to use as the sample"
     ),
+    url: str = typer.Option(None, "--url", "-u", help="API URL to fetch as the sample"),
     out: str = typer.Option(
         "schema.json", "--out", "-o", help="Where to write the inferred schema"
     ),
 ) -> None:
     """Infer a baseline schema from a JSON file and save it."""
-    data = load_json_file(file)
+    if not file and not url:
+        typer.echo("Provide either --file or --url")
+        raise typer.Exit(code=1)
+
+    data = load_json_file(file) if file else fetch_json_url(url)
     schema = infer_schema(data)
     save_json_file(out, schema.to_dict())
     typer.echo(f"Saved inferred schema to {out}")
@@ -55,13 +60,18 @@ def init(
 def check(
     schema: str = typer.Option(..., "--schema", "-S", help="Baseline schema file"),
     file: str = typer.Option(..., "--file", "-f", help="Current JSON file to compare"),
+    url: str = typer.Option(None, "--url", "-u", help="API URL to fetch as the sample"),
     output_format: str = typer.Option(
         "table", "--output-format", "-of", help="json, markdown, or table"
     ),
 ) -> None:
     """Compare a current JSON file against a saved baseline schema."""
+    if not file and not url:
+        typer.echo("Provide either --file or --url")
+        raise typer.Exit(code=1)
+
     old_schema = load_json_file(schema)
-    current_data = load_json_file(file)
+    current_data = load_json_file(file) if file else fetch_json_url(url)
     current_schema = infer_schema(current_data).to_dict()
 
     diff = diff_schema(old_schema, current_schema)
