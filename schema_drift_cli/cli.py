@@ -37,10 +37,12 @@ def version() -> None:
 
 @app.command()
 def init(
-    file: str = typer.Option(
-        ..., "--file", "-f", help="Local JSON file to use as the sample"
+    file: str | None = typer.Option(
+        None, "--file", "-f", help="Local JSON file to use as the sample"
     ),
-    url: str = typer.Option(None, "--url", "-u", help="API URL to fetch as the sample"),
+    url: str | None = typer.Option(
+        None, "--url", "-u", help="API URL to fetch as the sample"
+    ),
     out: str = typer.Option(
         "schema.json", "--out", "-o", help="Where to write the inferred schema"
     ),
@@ -59,8 +61,12 @@ def init(
 @app.command()
 def check(
     schema: str = typer.Option(..., "--schema", "-S", help="Baseline schema file"),
-    file: str = typer.Option(..., "--file", "-f", help="Current JSON file to compare"),
-    url: str = typer.Option(None, "--url", "-u", help="API URL to fetch as the sample"),
+    file: str | None = typer.Option(
+        None, "--file", "-f", help="Current JSON file to compare"
+    ),
+    url: str | None = typer.Option(
+        None, "--url", "-u", help="API URL to fetch as the sample"
+    ),
     output_format: str = typer.Option(
         "table", "--output-format", "-of", help="json, markdown, or table"
     ),

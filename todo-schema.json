@@ -1,0 +1,17 @@
+{
+  "kind": "object",
+  "children": {
+    "userId": {
+      "kind": "integer"
+    },
+    "id": {
+      "kind": "integer"
+    },
+    "title": {
+      "kind": "string"
+    },
+    "completed": {
+      "kind": "boolean"
+    }
+  }
+}
